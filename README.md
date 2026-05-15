@@ -22,9 +22,9 @@ sc ralph-cli status run --prd ./prd.json
 ### From GitHub Releases
 
 ```bash
-curl -LO https://github.com/javimosch/ralph-cli/releases/latest/download/ralph-linux-amd64
-chmod +x ralph-linux-amd64
-sudo mv ralph-linux-amd64 /usr/local/bin/ralph
+curl -LO https://github.com/javimosch/ralph-cli/releases/latest/download/ralph-cli-linux-amd64
+chmod +x ralph-cli-linux-amd64
+sudo mv ralph-cli-linux-amd64 /usr/local/bin/ralph-cli
 ```
 
 ### Build from source
@@ -32,32 +32,53 @@ sudo mv ralph-linux-amd64 /usr/local/bin/ralph
 ```bash
 git clone https://github.com/javimosch/ralph-cli.git
 cd ralph-cli
-go build -o ralph .
-sudo mv ralph /usr/local/bin/
+go build -o ralph-cli .
+sudo mv ralph-cli /usr/local/bin/ralph-cli
 ```
 
 ## Quick Start
 
 ```bash
-# Initialize a PRD
-ralph init "My Feature" --prd ./prd.json
+# 1. Initialize a PRD
+ralph-cli init "My Feature" --prd ./tasks/prd.json
 
-# Check status
-ralph status --prd ./prd.json
+# 2. Check what needs to be done
+ralph-cli status --prd ./tasks/prd.json
+ralph-cli story next --prd ./tasks/prd.json
 
-# Dry run (preview prompts without executing)
-ralph run --prd ./prd.json --dry-run
+# 3. Preview the agent prompt
+ralph-cli story prompt --prd ./tasks/prd.json
 
-# Run the agent loop
-ralph run --prd ./prd.json
+# 4. Run the agent loop (dry-run first to preview)
+ralph-cli run --prd ./tasks/prd.json --dry-run
+ralph-cli run --prd ./tasks/prd.json
 ```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `ralph-cli init <name> [description]` | Scaffold a new PRD JSON file |
+| `ralph-cli run --prd <file>` | Execute the agent loop (story by story) |
+| `ralph-cli status --prd <file>` | Show progress, next story, blocked stories |
+| `ralph-cli story next --prd <file>` | Print the next available story |
+| `ralph-cli story prompt --prd <file> [--story <id>]` | Generate agent prompt for a story |
+
+## Options
+
+| Flag | Description |
+|------|-------------|
+| `--prd <path>` | Path to PRD JSON file (required for most commands) |
+| `--agent <cmd>` | Agent CLI to use (default: auto-detect opencode, claude, codex) |
+| `--dry-run` | Print prompts without executing |
+| `--timeout <sec>` | Max seconds per agent execution (default: no timeout) |
 
 ## PRD Format
 
 ```json
 {
   "name": "My Feature",
-  "branchName": "ralph/my-feature",
+  "branchName": "my-feature",
   "description": "What this PRD is about",
   "userStories": [
     {
@@ -73,49 +94,13 @@ ralph run --prd ./prd.json
 }
 ```
 
-## Commands
+## How it Works
 
-| Command | Description |
-|---------|-------------|
-| `ralph run --prd <file>` | Execute the agent loop |
-| `ralph status --prd <file>` | Show progress |
-| `ralph story next --prd <file>` | Show next available story |
-| `ralph story prompt --prd <file>` | Print agent prompt for a story |
-| `ralph init <name> --prd <file>` | Scaffold a new PRD |
-
-## Flags
-
-| Flag | Description | Default |
-|------|-------------|--------|
-| `--prd` | Path to PRD JSON file | required |
-| `--agent` | Agent CLI command | auto-detect |
-| `--dry-run` | Print prompts without executing | false |
-| `--timeout` | Max seconds per agent execution | 300 |
-
-## supercli Usage
-
-Primary usage is through supercli (install via `npm install -g superacli`):
-
-```bash
-# Install the plugin
-sc plugins install ralph-cli
-
-# Init a PRD
-sc ralph-cli init run "Feature name" --prd ./prd.json
-
-# Run the loop
-sc ralph-cli run run --prd ./prd.json
-
-# Check status
-sc ralph-cli status run --prd ./prd.json
-
-# Next story
-sc ralph-cli story next --prd ./prd.json
-
-# Agent prompt
-sc ralph-cli prompt run --prd ./prd.json
-```
+1. **Define stories** in a `prd.json` with priorities, dependencies, and acceptance criteria
+2. **Run the loop** — `ralph-cli` selects the next unblocked story, builds a prompt, and spawns an agent
+3. **Agent implements** — the agent works autonomously and commits changes
+4. **Repeat** — `ralph-cli` marks the story as passing and moves to the next
 
 ## License
 
-MIT — Copyright (c) 2025 Javier Leandro Arancibia
+MIT

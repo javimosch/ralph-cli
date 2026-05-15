@@ -23,27 +23,26 @@ jobs:
           go-version: '1.22'
 
       - name: Build (linux/amd64)
-        run: GOOS=linux GOARCH=amd64 go build -o ralph-linux-amd64 .
+        run: GOOS=linux GOARCH=amd64 go build -o ralph-cli-linux-amd64 .
 
       - name: Build (linux/arm64)
-        run: GOOS=linux GOARCH=arm64 go build -o ralph-linux-arm64 .
+        run: GOOS=linux GOARCH=arm64 go build -o ralph-cli-linux-arm64 .
 
       - name: Build (darwin/amd64)
-        run: GOOS=darwin GOARCH=amd64 go build -o ralph-darwin-amd64 .
+        run: GOOS=darwin GOARCH=amd64 go build -o ralph-cli-darwin-amd64 .
 
       - name: Build (darwin/arm64)
-        run: GOOS=darwin GOARCH=arm64 go build -o ralph-darwin-arm64 .
+        run: GOOS=darwin GOARCH=arm64 go build -o ralph-cli-darwin-arm64 .
 
       - name: Checksums
-        run: sha256sum ralph-* > checksums.txt
+        run: sha256sum ralph-cli-* > checksums.txt
 
-      - name: Create Release
+      - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ralph-linux-amd64
-            ralph-linux-arm64
-            ralph-darwin-amd64
-            ralph-darwin-arm64
+            ralph-cli-linux-amd64
+            ralph-cli-linux-arm64
+            ralph-cli-darwin-amd64
+            ralph-cli-darwin-arm64
             checksums.txt
-          fail_on_unmatched_files: true
